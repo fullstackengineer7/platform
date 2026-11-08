@@ -1,1 +1,2 @@
-# platform
+## Architecture
+A blog platform built with clean Docker, PHP 8.1, MySQL 8, and Smarty. The project uses modular monolith with DDD and best principles oop. Core buildeng DI, router, midleware, http request. Business sleces article, categori, media. All media validtion slices.
