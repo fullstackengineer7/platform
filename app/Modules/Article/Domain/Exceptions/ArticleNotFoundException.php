@@ -8,4 +8,8 @@ use Exception;
 
 class ArticleNotFoundException extends Exception
 {
+    public function __construct(string $message = "Article not found")
+    {
+        parent::__construct($message, 404);
+    }
 }

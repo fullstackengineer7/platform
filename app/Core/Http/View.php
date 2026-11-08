@@ -13,9 +13,10 @@ class View
     public function __construct()
     {
         $this->smarty = new Smarty();
-        $this->smarty->setTemplateDir('resources/templates/');
-        $this->smarty->setCompileDir('storage/cache/templates');
-        $this->smarty->setCacheDir('storage/cache/cache');
+        $this->smarty->setTemplateDir(dirname(__DIR__, 3) . '/resources/templates/');
+        $this->smarty->setCompileDir(dirname(__DIR__, 3) . '/storage/cache/templates');
+        $this->smarty->escape_html = true;
+        $this->smarty->setCacheDir(dirname(__DIR__, 3) . '/storage/cache/cache');
     }
 
     public function render(string $template, array $data = []): Response

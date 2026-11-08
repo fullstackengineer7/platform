@@ -7,7 +7,7 @@ namespace App\Modules\Article\Application\GetArticle;
 use App\Modules\Article\Domain\Article;
 use App\Modules\Article\Domain\ArticleSlug;
 use App\Modules\Article\Domain\ArticleRepositoryInterface;
-use App\Modules\Article\Domain\ArticleNotFoundException;
+use App\Modules\Article\Domain\Exceptions\ArticleNotFoundException;
 
 class GetArticleUseCase
 {
@@ -15,14 +15,16 @@ class GetArticleUseCase
         private ArticleRepositoryInterface $repository
     ) {}
 
-    public function execute(string $slug): Article
+    public function execute(string $slug): array
     {
         $article = $this->repository->findBySlug(new ArticleSlug($slug));
 
-        if (!$article) {
+        if (!$article || $article->getStatus() !== \App\Modules\Article\Domain\ArticleStatus::PUBLISHED) {
             throw new ArticleNotFoundException("Article with slug $slug not found");
         }
 
-        return $article;
+        $this->repository->incrementViews($article->getId());
+
+        return [$article, $this->repository->getRelated($article, 4)];
     }
 }

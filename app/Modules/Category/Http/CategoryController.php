@@ -7,21 +7,37 @@ namespace App\Modules\Category\Http;
 use App\Core\Http\Request;
 use App\Core\Http\Response;
 use App\Core\Http\View;
-use App\Modules\Category\Application\GetCategoryUseCase;
+use App\Modules\Category\Application\GetCategory\GetCategoryUseCase;
+use App\Modules\Category\Application\GetHomeCategories\GetHomeCategoriesUseCase;
 
 class CategoryController
 {
     public function __construct(
         private View $view,
-        private GetCategoryUseCase $getCategory
+        private GetCategoryUseCase $getCategory,
+        private GetHomeCategoriesUseCase $getHomeCategories
     ) {}
+
+    public function index(Request $request): Response
+    {
+        return $this->view->render('pages/home.tpl', [
+            'items' => $this->getHomeCategories->execute(),
+            'title' => 'Blog Platform'
+        ]);
+    }
 
     public function show(Request $request, string $slug): Response
     {
-        $category = $this->getCategory->execute($slug);
+        [$category, $articles, $pagination] = $this->getCategory->execute(
+            $slug,
+            (int)$request->getParam('page', 1)
+        );
 
         return $this->view->render('pages/category.tpl', [
-            'category' => $category
+            'category' => $category,
+            'articles' => $articles,
+            'pagination' => $pagination,
+            'title' => $category->getName()->value
         ]);
     }
 }

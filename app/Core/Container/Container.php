@@ -26,14 +26,14 @@ class Container
 
     public function get(string $id): mixed
     {
-        if (isset($this->instances[$id]) && $this->instances[$id] !== null) {
+        if (($this->instances[$id] ?? null) !== null) {
             return $this->instances[$id];
         }
 
         $concrete = $this->definitions[$id] ?? $id;
         $object = $this->resolve($concrete);
 
-        if (isset($this->instances[$id])) {
+        if (array_key_exists($id, $this->instances)) {
             $this->instances[$id] = $object;
         }
 

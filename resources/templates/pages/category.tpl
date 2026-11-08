@@ -1,31 +1,50 @@
+{extends file="layouts/main.tpl"}
 {block name="content"}
-    <div class="category-detail">
-        <h1>{$category->getName()->value}</h1>
-        <p class="category-desc">{$category->getDescription()}</p>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">{$category->getName()->value}</li>
+        </ol>
+    </nav>
 
-        <div class="articles-list">
-            {foreach $articles as $article}
-                <div class="article-card">
-                    <h2><a href="/article/{$article->getSlug()->value}">{$article->getTitle()->value}</a></h2>
-                    <p>{$article->getDescription()}</p>
-                    <div class="article-meta">
-                        <span>{$article->getCreatedAt()->format('d.m.Y')}</span> |
-                        <span>{$article->getViews()} views</span>
+    <h1>{$category->getName()->value}</h1>
+    <p class="text-muted mb-4">{$category->getDescription()}</p>
+
+    <div class="row g-4">
+        {foreach $articles as $article}
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a class="text-decoration-none" href="/article/{$article->getSlug()->value}">{$article->getTitle()->value}</a>
+                        </h5>
+                        <p class="card-text">{$article->getDescription()}</p>
+                    </div>
+                    <div class="card-footer text-muted small">
+                        {$article->getCreatedAt()->format('d.m.Y')} &middot; {$article->getViews()} views
                     </div>
                 </div>
-            {/foreach}
-        </div>
-
-        {if $pagination}
-            <div class="pagination">
-                {if $pagination->hasPrevious()}
-                    <a href="{$pagination->getPreviousUrl()}">Previous</a>
-                {/if}
-                <span>Page {$pagination->getCurrentPage()} of {$pagination->getTotalPages()}</span>
-                {if $pagination->hasNext()}
-                    <a href="{$pagination->getNextUrl()}">Next</a>
-                {/if}
             </div>
-        {/if}
+        {foreachelse}
+            <p>No articles in this category.</p>
+        {/foreach}
     </div>
+
+    {if $pagination.total > 1}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {if $pagination.current <= 1}disabled{/if}">
+                    <a class="page-link" href="?page={$pagination.current - 1}">Previous</a>
+                </li>
+                {section name=p loop=$pagination.total}
+                    <li class="page-item {if $smarty.section.p.iteration == $pagination.current}active{/if}">
+                        <a class="page-link" href="?page={$smarty.section.p.iteration}">{$smarty.section.p.iteration}</a>
+                    </li>
+                {/section}
+                <li class="page-item {if $pagination.current >= $pagination.total}disabled{/if}">
+                    <a class="page-link" href="?page={$pagination.current + 1}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    {/if}
 {/block}

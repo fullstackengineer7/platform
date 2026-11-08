@@ -84,8 +84,9 @@ class MySqlArticleRepository implements ArticleRepositoryInterface
 
     public function getLatest(int $limit): array
     {
-        $stmt = $this->db->getConnection()->prepare("SELECT * FROM articles ORDER BY created_at DESC LIMIT ?");
-        $stmt->execute([$limit]);
+        $stmt = $this->db->getConnection()->prepare("SELECT * FROM articles WHERE status = 'published' ORDER BY created_at DESC, id DESC LIMIT ?");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
 
         $articles = [];
         while ($row = $stmt->fetch()) {
@@ -99,11 +100,14 @@ class MySqlArticleRepository implements ArticleRepositoryInterface
         $stmt = $this->db->getConnection()->prepare("
             SELECT a.* FROM articles a
             JOIN article_category ac ON a.id = ac.article_id
-            WHERE ac.category_id = ?
-            ORDER BY a.created_at DESC
+            WHERE ac.category_id = ? AND a.status = 'published'
+            ORDER BY a.created_at DESC, a.id DESC
             LIMIT ? OFFSET ?
         ");
-        $stmt->execute([$categoryId->value, $limit, $offset]);
+        $stmt->bindValue(1, $categoryId->value, PDO::PARAM_INT);
+        $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+        $stmt->execute();
 
         $articles = [];
         while ($row = $stmt->fetch()) {
@@ -118,18 +122,32 @@ class MySqlArticleRepository implements ArticleRepositoryInterface
             SELECT a.* FROM articles a
             JOIN article_category ac1 ON a.id = ac1.article_id
             JOIN article_category ac2 ON ac1.category_id = ac2.category_id
-            WHERE ac2.article_id = ? AND a.id != ?
+            WHERE ac2.article_id = ? AND a.id != ? AND a.status = 'published'
             GROUP BY a.id
             ORDER BY a.views DESC
             LIMIT ?
         ");
-        $stmt->execute([$article->getId()->value, $article->getId()->value, $limit]);
+        $stmt->bindValue(1, $article->getId()->value, PDO::PARAM_INT);
+        $stmt->bindValue(2, $article->getId()->value, PDO::PARAM_INT);
+        $stmt->bindValue(3, $limit, PDO::PARAM_INT);
+        $stmt->execute();
 
         $articles = [];
         while ($row = $stmt->fetch()) {
             $articles[] = $this->mapToEntity($row);
         }
         return $articles;
+    }
+
+    public function countByCategory(CategoryId $categoryId): int
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT COUNT(*) FROM articles a
+            JOIN article_category ac ON a.id = ac.article_id
+            WHERE ac.category_id = ? AND a.status = 'published'
+        ");
+        $stmt->execute([$categoryId->value]);
+        return (int)$stmt->fetchColumn();
     }
 
     public function incrementViews(ArticleId $id): void

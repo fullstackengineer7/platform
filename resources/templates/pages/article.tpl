@@ -1,34 +1,36 @@
+{extends file="layouts/main.tpl"}
 {block name="content"}
-    <div class="article-detail">
-        <header class="article-header">
-            <h1>{$article->getTitle()->value}</h1>
-            <div class="meta">
-                <span>Date: {$article->getCreatedAt()->format('d.m.Y')}</span> |
-                <span>Views: {$article->getViews()}</span>
-            </div>
-        </header>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">{$article->getTitle()->value}</li>
+        </ol>
+    </nav>
 
+    <article class="card shadow-sm mb-4">
         {if $article->getImagePath()}
-            <img src="/uploads/{$article->getImagePath()}" class="article-image" alt="{$article->getTitle()->value}">
+            <img src="/uploads/{$article->getImagePath()}" class="card-img-top" alt="{$article->getTitle()->value}">
         {/if}
-
-        <div class="article-description">
+        <div class="card-body">
+            <h1 class="card-title">{$article->getTitle()->value}</h1>
+            <p class="text-muted small">{$article->getCreatedAt()->format('d.m.Y')} &middot; {$article->getViews()} views</p>
             <p class="lead">{$article->getDescription()}</p>
+            <div>{$article->getContent()}</div>
         </div>
+    </article>
 
-        <div class="article-content">
-            {$article->getContent()}
-        </div>
-
-        <div class="related-articles">
-            <h3>Related Articles</h3>
-            <div class="related-grid">
-                {foreach $related as $relArticle}
-                    <div class="related-card">
-                        <a href="/article/{$relArticle->getSlug()->value}">{$relArticle->getTitle()->value}</a>
+    {if $related}
+        <h4 class="mb-3">Related articles</h4>
+        <div class="row g-3">
+            {foreach $related as $rel}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <a class="text-decoration-none" href="/article/{$rel->getSlug()->value}">{$rel->getTitle()->value}</a>
+                        </div>
                     </div>
-                {/foreach}
-            </div>
+                </div>
+            {/foreach}
         </div>
-    </div>
+    {/if}
 {/block}
