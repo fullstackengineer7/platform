@@ -19,7 +19,7 @@ class GetCategoryUseCase
         private ArticleRepositoryInterface $articles
     ) {}
 
-    public function execute(string $slug, int $page): array
+    public function execute(string $slug, int $page, string $sort): array
     {
         try {
             $category = $this->categories->findBySlug(new CategorySlug($slug));
@@ -37,7 +37,7 @@ class GetCategoryUseCase
 
         return [
             $category,
-            $this->articles->getByCategory($category->getId(), ($page - 1) * self::PER_PAGE, self::PER_PAGE),
+            $this->articles->getByCategory($category->getId(), ($page - 1) * self::PER_PAGE, self::PER_PAGE, $sort),
             ['current' => $page, 'total' => $totalPages],
         ];
     }

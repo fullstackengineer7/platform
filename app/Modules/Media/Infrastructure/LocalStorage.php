@@ -29,7 +29,6 @@ class LocalStorage implements StorageInterface
         $destination = $this->storagePath . '/' . $uniqueName;
 
         if (!move_uploaded_file($sourcePath, $destination)) {
-            // Fallback for non-uploaded files (e.g. in tests)
             if (!copy($sourcePath, $destination)) {
                 throw new Exception("Failed to move uploaded file");
             }

@@ -1,0 +1,28 @@
+@use 'variables' as *;
+
+.card {
+    border: 0;
+    border-radius: $radius;
+    box-shadow: $shadow;
+    transition: transform 0.15s, box-shadow 0.15s;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    &-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+}
+
+article.card {
+    &:hover {
+        transform: none;
+    }
+
+    .card-img-top {
+        height: 360px;
+    }
+}

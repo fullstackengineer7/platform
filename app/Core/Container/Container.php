@@ -21,7 +21,7 @@ class Container
     public function singleton(string $id, mixed $concrete = null): void
     {
         $this->set($id, $concrete);
-        $this->instances[$id] = null; // Mark as singleton
+        $this->instances[$id] = null;
     }
 
     public function get(string $id): mixed

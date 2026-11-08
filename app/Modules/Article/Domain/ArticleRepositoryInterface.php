@@ -13,7 +13,8 @@ interface ArticleRepositoryInterface
     public function save(Article $article): void;
     public function delete(ArticleId $id): void;
     public function getLatest(int $limit): array;
-    public function getByCategory(CategoryId $categoryId, int $offset, int $limit): array;
+    public function getByCategory(CategoryId $categoryId, int $offset, int $limit, string $sort = 'date'): array;
+    public function getLatestForCategories(int $perCategory): array;
     public function getRelated(Article $article, int $limit): array;
     public function countByCategory(CategoryId $categoryId): int;
     public function incrementViews(ArticleId $id): void;

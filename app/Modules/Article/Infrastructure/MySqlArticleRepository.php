@@ -44,8 +44,8 @@ class MySqlArticleRepository implements ArticleRepositoryInterface
 
         if ($article->getId() === null || $article->getId()->value === 0) {
             $stmt = $pdo->prepare("
-                INSERT INTO articles (title, slug, description, content, image, status, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO articles (title, slug, description, content, image, views, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $article->getTitle()->value,
@@ -53,11 +53,11 @@ class MySqlArticleRepository implements ArticleRepositoryInterface
                 $article->getDescription(),
                 $article->getContent(),
                 $article->getImagePath(),
+                $article->getViews(),
                 $article->getStatus()->value,
                 $article->getCreatedAt()->format('Y-m-d H:i:s'),
                 $article->getUpdatedAt()->format('Y-m-d H:i:s'),
             ]);
-            // Note: In a real app, we would update the entity with the new ID here.
         } else {
             $stmt = $pdo->prepare("
                 UPDATE articles SET title = ?, slug = ?, description = ?, content = ?, image = ?, status = ?, updated_at = ?
@@ -95,13 +95,14 @@ class MySqlArticleRepository implements ArticleRepositoryInterface
         return $articles;
     }
 
-    public function getByCategory(CategoryId $categoryId, int $offset, int $limit): array
+    public function getByCategory(CategoryId $categoryId, int $offset, int $limit, string $sort = 'date'): array
     {
+        $order = $sort === 'views' ? 'a.views DESC, a.created_at DESC' : 'a.created_at DESC, a.id DESC';
         $stmt = $this->db->getConnection()->prepare("
             SELECT a.* FROM articles a
             JOIN article_category ac ON a.id = ac.article_id
             WHERE ac.category_id = ? AND a.status = 'published'
-            ORDER BY a.created_at DESC, a.id DESC
+            ORDER BY $order
             LIMIT ? OFFSET ?
         ");
         $stmt->bindValue(1, $categoryId->value, PDO::PARAM_INT);
@@ -114,6 +115,30 @@ class MySqlArticleRepository implements ArticleRepositoryInterface
             $articles[] = $this->mapToEntity($row);
         }
         return $articles;
+    }
+
+    public function getLatestForCategories(int $perCategory): array
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT t.category_id, t.id, t.title, t.slug, t.description, t.content, t.image, t.views, t.status, t.created_at, t.updated_at
+            FROM (
+                SELECT ac.category_id, a.*,
+                    ROW_NUMBER() OVER (PARTITION BY ac.category_id ORDER BY a.created_at DESC, a.id DESC) AS rn
+                FROM articles a
+                JOIN article_category ac ON a.id = ac.article_id
+                WHERE a.status = 'published'
+            ) t
+            WHERE t.rn <= ?
+            ORDER BY t.category_id, t.rn
+        ");
+        $stmt->bindValue(1, $perCategory, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $grouped = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $grouped[(int)$row['category_id']][] = $this->mapToEntity($row);
+        }
+        return $grouped;
     }
 
     public function getRelated(Article $article, int $limit): array

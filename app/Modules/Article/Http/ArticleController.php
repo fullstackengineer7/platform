@@ -20,11 +20,12 @@ class ArticleController
 
     public function show(Request $request, string $slug): Response
     {
-        [$article, $related] = $this->getArticle->execute($slug);
+        [$article, $related, $categories] = $this->getArticle->execute($slug);
 
         return $this->view->render('pages/article.tpl', [
             'article' => $article,
             'related' => $related,
+            'categories' => $categories,
             'title' => $article->getTitle()->value
         ]);
     }

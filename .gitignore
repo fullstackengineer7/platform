@@ -7,3 +7,5 @@
 .DS_Store
 .env
 .phpunit.result.cache
+/public/uploads/*
+/node_modules/

@@ -7,12 +7,14 @@ namespace App\Modules\Article\Application\GetArticle;
 use App\Modules\Article\Domain\Article;
 use App\Modules\Article\Domain\ArticleSlug;
 use App\Modules\Article\Domain\ArticleRepositoryInterface;
+use App\Modules\Category\Domain\CategoryRepositoryInterface;
 use App\Modules\Article\Domain\Exceptions\ArticleNotFoundException;
 
 class GetArticleUseCase
 {
     public function __construct(
-        private ArticleRepositoryInterface $repository
+        private ArticleRepositoryInterface $repository,
+        private CategoryRepositoryInterface $categories
     ) {}
 
     public function execute(string $slug): array
@@ -25,6 +27,6 @@ class GetArticleUseCase
 
         $this->repository->incrementViews($article->getId());
 
-        return [$article, $this->repository->getRelated($article, 4)];
+        return [$article, $this->repository->getRelated($article, 3), $this->categories->findByArticleId($article->getId()->value)];
     }
 }

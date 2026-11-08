@@ -20,7 +20,6 @@ class ExceptionHandler
 
         $response->setStatusCode($code);
 
-        // In production, we would hide detailed errors.
         $response->setContent("<h1>Error $code</h1><p>" . htmlspecialchars($e->getMessage()) . "</p>");
 
         return $response;

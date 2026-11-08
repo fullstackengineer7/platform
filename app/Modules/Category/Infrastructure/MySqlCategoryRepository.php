@@ -86,6 +86,19 @@ class MySqlCategoryRepository implements CategoryRepositoryInterface
         return $categories;
     }
 
+    public function findByArticleId(int $articleId): array
+    {
+        $stmt = $this->db->getConnection()->prepare("
+            SELECT c.* FROM categories c
+            JOIN article_category ac ON c.id = ac.category_id
+            WHERE ac.article_id = ?
+            ORDER BY c.name ASC
+        ");
+        $stmt->execute([$articleId]);
+
+        return array_map(fn(array $row) => $this->mapToEntity($row), $stmt->fetchAll());
+    }
+
     private function mapToEntity(array $row): Category
     {
         return new Category(

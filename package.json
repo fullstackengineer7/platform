@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "scss": "sass --no-source-map --style=compressed resources/scss/app.scss public/css/style.css",
+    "scss:watch": "sass --watch resources/scss/app.scss public/css/style.css"
+  },
+  "devDependencies": {
+    "sass": "^1.77.0"
+  }
+}

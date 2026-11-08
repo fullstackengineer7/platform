@@ -36,6 +36,17 @@ $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
 $categoryRepo = new MySqlCategoryRepository($database);
 $articleRepo = new MySqlArticleRepository($database);
 
+$uploadDir = __DIR__ . '/../public/uploads';
+if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+}
+
+$images = [];
+foreach (glob(__DIR__ . '/../resources/seed-images/*.jpg') as $file) {
+    copy($file, $uploadDir . '/' . basename($file));
+    $images[] = basename($file);
+}
+
 echo "Seeding categories...\n";
 $categoriesData = [
     ['PHP', 'php', 'Everything about PHP 8.1+'],
@@ -55,7 +66,6 @@ foreach ($categoriesData as $data) {
     );
     $categoryRepo->save($category);
 
-    // Get the last inserted ID since our basic repo doesn't return it
     $id = (int)$pdo->lastInsertId();
     $createdCategories[] = new CategoryId($id);
 }
@@ -75,21 +85,24 @@ for ($i = 1; $i <= 30; $i++) {
     $slugValue = trim($slugValue, '-');
     $slug = $slugValue . '-' . $i;
 
+    $createdAt = new DateTimeImmutable('-' . rand(0, 120) . ' days -' . rand(0, 23) . ' hours');
+
     $article = new Article(
         new ArticleId(0),
         new ArticleTitle($title),
         new ArticleSlug($slug),
         "Description for article $i",
         "Full content for article $i. This is a test article to fill the database with realistic data.",
-        null,
+        $images[array_rand($images)],
         rand(0, 1000),
-        ArticleStatus::PUBLISHED
+        ArticleStatus::PUBLISHED,
+        $createdAt,
+        $createdAt
     );
 
     $articleRepo->save($article);
     $articleId = (int)$pdo->lastInsertId();
 
-    // Assign to 1-3 random categories
     $randomCats = (array)array_rand($createdCategories, rand(1, 3));
     foreach ($randomCats as $catIdx) {
         $catId = $createdCategories[$catIdx]->value;

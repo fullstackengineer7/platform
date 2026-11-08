@@ -14,10 +14,11 @@
                         <ul class="list-unstyled mb-0">
                             {foreach $item.articles as $article}
                                 <li class="mb-1"><a href="/article/{$article->getSlug()->value}">{$article->getTitle()->value}</a></li>
-                            {foreachelse}
-                                <li class="text-muted">No articles yet</li>
                             {/foreach}
                         </ul>
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <a class="btn btn-primary btn-sm" href="/category/{$item.category->getSlug()->value}">Все статьи</a>
                     </div>
                 </div>
             </div>

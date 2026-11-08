@@ -14,6 +14,11 @@
         <div class="card-body">
             <h1 class="card-title">{$article->getTitle()->value}</h1>
             <p class="text-muted small">{$article->getCreatedAt()->format('d.m.Y')} &middot; {$article->getViews()} views</p>
+            <p>
+                {foreach $categories as $category}
+                    <a class="badge text-bg-secondary text-decoration-none" href="/category/{$category->getSlug()->value}">{$category->getName()->value}</a>
+                {/foreach}
+            </p>
             <p class="lead">{$article->getDescription()}</p>
             <div>{$article->getContent()}</div>
         </div>
@@ -23,7 +28,7 @@
         <h4 class="mb-3">Related articles</h4>
         <div class="row g-3">
             {foreach $related as $rel}
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-4">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <a class="text-decoration-none" href="/article/{$rel->getSlug()->value}">{$rel->getTitle()->value}</a>

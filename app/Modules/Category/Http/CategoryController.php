@@ -28,15 +28,19 @@ class CategoryController
 
     public function show(Request $request, string $slug): Response
     {
+        $sort = $request->getParam('sort') === 'views' ? 'views' : 'date';
+
         [$category, $articles, $pagination] = $this->getCategory->execute(
             $slug,
-            (int)$request->getParam('page', 1)
+            (int)$request->getParam('page', 1),
+            $sort
         );
 
         return $this->view->render('pages/category.tpl', [
             'category' => $category,
             'articles' => $articles,
             'pagination' => $pagination,
+            'sort' => $sort,
             'title' => $category->getName()->value
         ]);
     }

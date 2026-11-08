@@ -14,15 +14,17 @@ class GetHomeCategoriesUseCase
         private ArticleRepositoryInterface $articles
     ) {}
 
-    public function execute(int $articlesPerCategory = 5): array
+    public function execute(int $articlesPerCategory = 3): array
     {
+        $grouped = $this->articles->getLatestForCategories($articlesPerCategory);
         $result = [];
 
         foreach ($this->categories->findAll() as $category) {
-            $result[] = [
-                'category' => $category,
-                'articles' => $this->articles->getByCategory($category->getId(), 0, $articlesPerCategory),
-            ];
+            $articles = $grouped[$category->getId()->value] ?? [];
+
+            if ($articles) {
+                $result[] = ['category' => $category, 'articles' => $articles];
+            }
         }
 
         return $result;
